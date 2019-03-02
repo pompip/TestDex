@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.chong.aidllibrary.MyPerson;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -26,12 +28,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                Toast.makeText(context, "hello", Toast.LENGTH_SHORT).show();
-                Bundle extras = intent.getExtras();
-                extras.setClassLoader(MyBean.class.getClassLoader());
-                MyBean myBean = extras.getParcelable("key");
+                Log.e("hi","hello");
 
-                Log.e("hi",myBean.name);
+                Bundle extras = intent.getExtras();
+
+                MyPerson myBean = extras.getParcelable("key");
+                Toast.makeText(context, myBean.name, Toast.LENGTH_SHORT).show();
+
             }catch (Exception e){
                 e.printStackTrace();
             }

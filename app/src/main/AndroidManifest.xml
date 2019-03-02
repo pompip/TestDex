@@ -21,9 +21,13 @@
         </activity>
 
         <service
-            android:name="com.chong.aidllibrary.PersonService"
+            android:name=".PersonService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true">
+            <intent-filter >
+                <action android:name="hello"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
