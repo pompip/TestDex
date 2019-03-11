@@ -1,5 +1,7 @@
 package com.chong.testdex;
 
+import android.media.MediaPlayer;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -19,6 +21,7 @@ public class ExampleUnitTest {
 
     @Test
     public void testInt() {
+
         P a = new P(1);
 
         tes(a);

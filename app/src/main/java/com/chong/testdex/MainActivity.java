@@ -1,28 +1,24 @@
 package com.chong.testdex;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
-
 import com.chong.aidllibrary.MyPerson;
+import dalvik.system.DexClassLoader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import dalvik.system.DexClassLoader;
-
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     class MyReceiver extends BroadcastReceiver{
 
         @Override
@@ -49,6 +45,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         registerReceiver(receiver,new IntentFilter("hello"));
+        findViewById(R.id.root).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick: start ");
+                RootManager.root(MainActivity.this);
+                Log.i(TAG, "onClick: end ");
+            }
+        });
 
 
 
@@ -62,13 +66,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadDex(){
         DexClassLoader dexClassLoader =
-                new DexClassLoader(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Testplugin-debug.apk",
+                new DexClassLoader("/data/local/tmp/Testplugin-debug.apk",
                         getCacheDir().getAbsolutePath(),null,getClassLoader());
         try {
             Class<?> ClassSomeThing = dexClassLoader.loadClass("com.chong.testplugin.SomeThing");
             Object o = ClassSomeThing.newInstance();
             Method genSome = ClassSomeThing.getMethod("genSome");
             String invoke = (String) genSome.invoke(o);
+
+
 
             Method print = ClassSomeThing.getMethod("print", Context.class, String.class);
             print.invoke(o,this,"hello bonree");
