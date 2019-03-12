@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".SomethingActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +23,12 @@
         </activity>
 
         <service
-            android:process=":download"
             android:name=".PersonService"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter >
-                <action android:name="hello"/>
+            android:exported="true"
+            android:process=":download">
+            <intent-filter>
+                <action android:name="hello" />
             </intent-filter>
         </service>
     </application>
