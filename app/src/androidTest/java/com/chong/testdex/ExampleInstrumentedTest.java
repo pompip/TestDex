@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewAction;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
@@ -34,9 +33,6 @@ public class ExampleInstrumentedTest {
         assertEquals("com.chong.testdex", appContext.getPackageName());
 
     }
-
-    @Rule
-    public ActivityTestRule<MainActivity> testRule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
     public void testMainActivity(){

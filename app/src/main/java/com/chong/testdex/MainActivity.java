@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +16,22 @@ import android.widget.Toast;
 
 import com.chong.aidllibrary.Animal;
 import com.chong.aidllibrary.MyPerson;
+import com.jaredrummler.android.processes.AndroidProcesses;
+import com.jaredrummler.android.processes.models.AndroidAppProcess;
+import com.jaredrummler.android.processes.models.Stat;
+import com.jaredrummler.android.processes.models.Statm;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.List;
 
 import dalvik.system.DexClassLoader;
 
@@ -37,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
             }catch (Exception e){
                 e.printStackTrace();
             }
-
         }
     }
 
@@ -48,11 +62,97 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         registerReceiver(receiver,new IntentFilter("hello"));
-
-        loadDex();
-
+//        loadDex();
         testRoot();
+//        try {
+//            getAppCpuTime(28894);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        exeShell(28894);
+        try {
+            androidShell();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void androidShell() throws IOException {
+        List<AndroidAppProcess> processes = AndroidProcesses.getRunningAppProcesses();
+
+        for (AndroidAppProcess process : processes) {
+            // Get some information about the process
+            String processName = process.name;
+
+
+            Stat stat = process.stat();
+            int pid = stat.getPid();
+            int parentProcessId = stat.ppid();
+            long startTime = stat.stime();
+            int policy = stat.policy();
+            char state = stat.state();
+
+            Statm statm = process.statm();
+            long totalSizeOfProcess = statm.getSize();
+            long residentSetSize = statm.getResidentSetSize();
+
+            Log.e(TAG, "androidShell: "+ pid +" shell name:"+processName);
+
+//            PackageInfo packageInfo = process.getPackageInfo(context, 0);
+//            String appName = packageInfo.applicationInfo.loadLabel(pm).toString();
+        }
+    }
+
+    private void exeShell(int pid){
+        try {
+                        String command =  "cat /proc/"+pid+"/stat\n";
+            Process exec = Runtime.getRuntime().exec(command);
+            OutputStream outputStream = exec.getOutputStream();
+//            String command =  "cat /proc/"+pid+"/stat\n";
+//            outputStream.write(command.getBytes());
+
+            outputStream.write("exit\n".getBytes());
+            outputStream.flush();
+            outputStream.close();
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+            String line;
+            StringBuilder result = new StringBuilder();
+            while ((line = bufferedReader.readLine())!=null){
+                Log.e(TAG, "exeShell: "+line );
+                result.append(line);
+            }
+           exec.waitFor();
+            bufferedReader.close();
+            exec.destroy();
+            Log.e(TAG, "exeShell: "+"hello" );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static long getAppCpuTime(int pid) throws Exception{ // 获取应用占用的CPU时间
+        long appCpuTime = 0;
+        try{
+            String[] cpuInfos = null;
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/proc/" + pid + "/stat")), 1000);
+            CMD.CommandResult commandResult = CMD.execCommand("cat /prop/" + pid + "/stat", false);
+            String successMsg = commandResult.successMsg;
+//            String load = reader.readLine();
+            cpuInfos = successMsg.split(" ");
+
+            //20170731 参考源码15,16两索引的数据不用来计算的CPU值 frameworks/base/core/java/com/android/internal/os/ProcessCpuTracker
+//            appCpuTime = Long.parseLong(cpuInfos[13])
+//                    + Long.parseLong(cpuInfos[14])
+//                    + Long.parseLong(cpuInfos[15])
+//                    + Long.parseLong(cpuInfos[16]);
+            Log.e(TAG, "getAppCpuTime: "+successMsg );
+//            reader.close();
+        }catch(Exception e){
+            Log.e(TAG, pid +" ------------getAppCpuTime Exception ."+e.getMessage());
+            throw e;
+        }
+        return appCpuTime;
     }
 
     @Override
@@ -107,5 +207,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode ==1){
             Toast.makeText(this, "permmision is ok", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void testMediaPlayer(){
+
     }
 }
